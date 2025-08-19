@@ -20,15 +20,20 @@ MirrorBox streamlines your Docker experience with a powerful set of features, pr
 
 ---
 
-## 📦 Installation
+## 📦 Installation & Quick Start
 
-With Python 3.10+ and `pip` installed, you can install MirrorBox directly from GitHub with a single command. This is the recommended method for getting the latest version.
+MirrorBox requires **Python 3.10+**. It is strongly recommended to install it inside a **virtual environment** to avoid system package conflicts.
 
+### 1️⃣ Create a Virtual Environment
 ```bash
-pip install git+[https://github.com/pouyarer/mirrorbox.git](https://github.com/pouyarer/mirrorbox.git)
+python3 -m venv venv
 
-🛠️ Usage Quick Start
-Here are some examples of the most common commands.
+2️⃣ Activate the Environment
+source venv/bin/activate
+
+3️⃣ Install MirrorBox from GitHub
+pip install git+https://github.com/pouyarer/mirrorbox.git
+
 
 1. Pulling an Image (The Smart Way)
 MirrorBox first checks its local cache. If the image isn't there, it finds the best mirror, pulls the image, re-tags it, and saves it to the cache for next time.
