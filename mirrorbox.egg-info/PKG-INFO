@@ -8,4 +8,5 @@ License-File: LICENSE
 Requires-Dist: typer[all]
 Requires-Dist: rich
 Requires-Dist: requests
+Requires-Dist: pyyaml
 Dynamic: license-file
