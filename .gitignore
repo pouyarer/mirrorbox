@@ -1,0 +1,13 @@
+# Python
+__pycache__/
+*.pyc
+
+# Virtual Environment
+.venv/
+
+# IDE specific
+.vscode/
+.idea/
+
+# MirrorBox local files
+.mirrorbox/

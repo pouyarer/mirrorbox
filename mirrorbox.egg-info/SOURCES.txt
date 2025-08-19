@@ -1,0 +1,11 @@
+pyproject.toml
+mirrorbox/__init__.py
+mirrorbox/cli.py
+mirrorbox/main.py
+mirrorbox/mirrors.py
+mirrorbox.egg-info/PKG-INFO
+mirrorbox.egg-info/SOURCES.txt
+mirrorbox.egg-info/dependency_links.txt
+mirrorbox.egg-info/entry_points.txt
+mirrorbox.egg-info/requires.txt
+mirrorbox.egg-info/top_level.txt

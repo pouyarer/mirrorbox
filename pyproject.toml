@@ -1,0 +1,14 @@
+[project]
+name = "mirrorbox"
+version = "0.1.0"
+authors = [{ name = "Pouya Rezapour", email = "pouyarezapourr@gmail.com" }]
+description = "A simple tool to pull Docker images from Iranian mirrors."
+requires-python = ">=3.10"
+dependencies = [
+    "typer[all]",
+    "rich",
+    "requests",
+]
+
+[project.scripts]
+mirrorbox = "mirrorbox.cli:app"
