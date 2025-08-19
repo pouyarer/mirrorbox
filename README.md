@@ -61,6 +61,7 @@ mirrorbox pull ubuntu:22.04
 
 **List Local Docker Images**
 Get a clean, table-formatted view of all images currently loaded in your Docker daemon (similar to `docker images`).
+
 ```bash
 mirrorbox list-images
 ```
