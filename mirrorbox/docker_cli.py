@@ -65,6 +65,5 @@ def pull_image_from_mirror(image_name: str, mirror: str) -> bool:
         success=success,
         details=f"image: {image_name}, error: {details}" if not success else f"image: {image_name}"
     )
-    # ------------------------------------
 
     return success
