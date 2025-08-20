@@ -30,7 +30,8 @@ python3 -m venv venv
 
 ## 2️⃣ Activate the Environment
 ```bash
-source venv/bin/activate
+source venv/bin/activate (Linux)
+venv\Scripts\activate.bat (Windonws)
 ```
 ## 3️⃣ Install MirrorBox
 ```bash
