@@ -3,11 +3,14 @@ import requests
 import time
 from . import history_handler
 
-# List of Iranian mirrors
+# List of mirrors
 MIRRORS = [
     "docker.arvancloud.ir",
     "focker.ir",
     "docker.iranserver.com",
+    "shatel.cloud", 
+    "hub.hamdocker.ir",
+
 ]
 
 def check_mirror_status(mirror_url: str) -> dict:

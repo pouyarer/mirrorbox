@@ -6,6 +6,7 @@ from rich.live import Live
 from rich.spinner import Spinner
 import subprocess
 import sys
+from rich.panel import Panel
 from typing import List
 import shutil
 import os
@@ -58,6 +59,55 @@ def get_mirrors_to_try() -> list:
         else:
             console.print(f"[yellow]⚠️ Priority mirror '{priority_mirror}' is offline. Using the next fastest mirror...[/]")
     return online_mirrors
+
+
+@app.command(name="start", help="🚀 Shows a quick start guide with main commands.")
+def start():
+    """
+    Displays a welcome panel and a quick start guide for MirrorBox.
+    """
+    
+    welcome_message = """
+[bold green]Welcome to MirrorBox![/bold green]
+
+This tool is your smart gateway to Docker, designed to bypass registry restrictions and accelerate your image pulls using local mirrors and an intelligent cache.
+
+Here are the key commands to get you started:
+
+[bold]Main & Daily Commands[/bold]
+- [cyan]mirrorbox pull [underline]IMAGE[/underline][/cyan]: Smartly pulls an image from the cache or the best mirror.
+- [cyan]mirrorbox compose up[/cyan]: Pre-pulls all images for a `docker-compose.yml` and then runs it.
+- [cyan]mirrorbox list-mirrors[/cyan]: Checks the status and latency of all available mirrors.
+- [cyan]mirrorbox search [underline]IMAGE[/underline][/cyan]: Finds if an image exists on the mirrors.
+- [cyan]mirrorbox list-images[/cyan]: Lists all images currently in your Docker daemon.
+
+[bold]Cache Management[/bold]
+- [cyan]mirrorbox cache list[/cyan]: Lists all images saved in the local cache.
+- [cyan]mirrorbox cache save [underline]IMAGE[/underline][/cyan]: Saves an image to the cache.
+- [cyan]mirrorbox cache remove [underline]FILENAME[/underline][/cyan]: Removes an image from the cache.
+
+[bold]Configuration[/bold]
+- [cyan]mirrorbox config show[/cyan]: Shows the current configuration.
+- [cyan]mirrorbox config set-priority [underline]MIRROR[/underline][/cyan]: Sets a preferred mirror.
+- [cyan]mirrorbox config unset-priority[/cyan]: Unsets the priority mirror.
+
+[bold]Monitoring & Reporting[/bold]
+- [cyan]mirrorbox report show[/cyan]: Shows the history of operations.
+- [cyan]mirrorbox monitor start[/cyan]: Launches a live dashboard to monitor mirrors.
+
+For more details on any command, use the `--help` flag.
+Example: `mirrorbox pull --help`
+"""
+    
+    panel = Panel.fit(
+        welcome_message,
+        title="🎉 MirrorBox Quick Start Guide 🎉",
+        border_style="blue",
+        padding=(1, 2)
+    )
+    
+    console.print(panel)
+
 
 # --- Main Command Definitions ---
 @app.command(name="list-images", help="🖼️  Display a list of all images in Docker (equivalent to `docker images`).")
@@ -123,6 +173,8 @@ def search_image(image_name: str = typer.Argument(..., help="Name of the image, 
             else:
                 table.add_row(mirror_host, mirror_status['status'], "---")
     console.print(table)
+
+    
 
 
 @app.command(name="pull", help="📥 Pull an image from the priority mirror, the fastest mirror, or the local cache.")
@@ -310,3 +362,4 @@ def monitor_start(
                 live.update(generate_table())
     except KeyboardInterrupt:
         console.print("\n[yellow]Monitoring dashboard stopped.[/]")
+        
