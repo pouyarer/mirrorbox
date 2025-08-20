@@ -7,7 +7,6 @@ MIRRORS = [
     "docker.arvancloud.ir",
     "focker.ir",
     "docker.iranserver.com",
-    "shatel.cloud", 
     "hub.hamdocker.ir",
 
 ]
