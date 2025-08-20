@@ -1,4 +1,3 @@
-# mirrorbox/mirrors.py
 import requests
 import time
 from . import history_handler
