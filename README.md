@@ -20,51 +20,112 @@ MirrorBox streamlines your Docker experience with a powerful set of features, pr
 
 ---
 
-## 📦 Installation
+## 📦 Installation & Quick Start
 
-With Python 3.10+ and `pip` installed, you can install MirrorBox directly from GitHub with a single command. This is the recommended method for getting the latest version.
+MirrorBox requires **Python 3.10+**. It is strongly recommended to install it inside a **virtual environment** to avoid system package conflicts.
+
+### 1️⃣ Create a Virtual Environment
+```bash
+python3 -m venv venv
+
+2️⃣ Activate the Environment
+source venv/bin/activate
+
+3️⃣ Install MirrorBox from GitHub
+pip install git+https://github.com/pouyarer/mirrorbox.git
+
+
+## 🛠️ Usage / Commands
+
+Here is a guide to all the available commands in MirrorBox.
+
+### **1. Basic Mirror & Image Commands**
+
+**Check Mirror Status**
+Get a live report of all supported mirrors, their status, and latency.
+```bash
+mirrorbox list-mirrors
+```
+
+**Search for an Image**
+Check which mirrors have a specific image tag available before pulling.
+```bash
+mirrorbox search nginx:latest
+```
+
+**Pull an Image (The Smart Way)**
+MirrorBox first checks the local cache. If not found, it pulls from the best available mirror and then automatically saves the image to the cache for the next time.
+```bash
+mirrorbox pull ubuntu:22.04
+```
+
+**List Local Docker Images**
+Get a clean, table-formatted view of all images currently loaded in your Docker daemon (similar to `docker images`).
 
 ```bash
-pip install git+[https://github.com/pouyarer/mirrorbox.git](https://github.com/pouyarer/mirrorbox.git)
-
-🛠️ Usage Quick Start
-Here are some examples of the most common commands.
-
-1. Pulling an Image (The Smart Way)
-MirrorBox first checks its local cache. If the image isn't there, it finds the best mirror, pulls the image, re-tags it, and saves it to the cache for next time.
-
-mirrorbox pull nginx:latest
-
-
-2. Working with Docker Compose
-Navigate to your project directory (where docker-compose.yml is located) and run:
-
-mirrorbox compose up -d
-
-MirrorBox will read your file, pull all required images, and then execute docker compose up -d.
-
-3. Managing the Cache
-
-# List all images saved in the cache
-mirrorbox cache list
-
-# Manually save an image you already have to the cache
-mirrorbox cache save httpd:latest
-
-# Remove an image from the cache
-mirrorbox cache remove httpd-latest.tar
-
-
-4. Viewing All Your Docker Images
-Get a clean, table-formatted view of all images loaded in your Docker daemon.
-
 mirrorbox list-images
+```
 
-5. Monitoring Mirrors
-Launch a live dashboard to monitor mirror status (updates every 5 seconds by default).
+### **2. Docker Compose Integration**
 
+Navigate to your project directory (where `docker-compose.yml` is located) and run `up`. MirrorBox will read your file, pull all required images, and then execute the standard `docker compose up` command. Any extra arguments are passed through.
+```bash
+mirrorbox compose up -d --build
+```
+
+### **3. Cache Management**
+
+**List Cached Images**
+See all the images saved in the MirrorBox cache directory.
+```bash
+mirrorbox cache list
+```
+
+**Save an Image to Cache**
+Manually save an image you already have locally to the cache.
+```bash
+mirrorbox cache save httpd:latest
+```
+
+**Remove an Image from Cache**
+Delete one or more images from the cache to free up space.
+```bash
+mirrorbox cache remove httpd-latest.tar nginx-latest.tar
+```
+
+### **4. Configuration**
+
+**View Current Settings**
+See the current configuration, including the priority mirror.
+```bash
+mirrorbox config show
+```
+
+**Set a Priority Mirror**
+Tell MirrorBox to always try a specific mirror first if it's online.
+```bash
+mirrorbox config set-priority focker.ir
+```
+
+**Remove the Priority Setting**
+Go back to the default behavior of choosing the fastest mirror.
+```bash
+mirrorbox config unset-priority
+```
+
+### **5. Monitoring & Reporting**
+
+**Show History Report**
+Get a history of recent events, such as health checks and pull attempts.
+```bash
+mirrorbox report show --limit 15
+```
+
+**Launch Live Dashboard**
+Start a live, full-screen dashboard to monitor mirror status in real-time. Press `Ctrl+C` to exit.
+```bash
 mirrorbox monitor start --interval 5
-
+```
 📄 License
 Copyright (c) 2025 Pouya Rezapour. All Rights Reserved. See the LICENSE file for more details.
 
