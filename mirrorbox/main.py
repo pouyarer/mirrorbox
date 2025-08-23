@@ -18,10 +18,11 @@ import mirrorbox.compose_handler as compose_handler
 import mirrorbox.cache_handler as cache_handler
 import mirrorbox.config_handler as config_handler
 import mirrorbox.history_handler as history_handler
-import mirrorbox.image_handler as image_handler # <-- New module added
+import mirrorbox.image_handler as image_handler
+import mirrorbox.gui_app as gui_app 
 
 app = typer.Typer(
-    help="MirrorBox: A smart tool for managing and pulling Docker images via Iranian mirrors.",
+    help="MirrorBox: A smart tool for managing and pulling Docker images.",
     rich_markup_mode="markdown"
 )
 
@@ -29,7 +30,7 @@ app = typer.Typer(
 compose_app = typer.Typer(help="⚡️ Commands for managing Docker Compose projects.")
 app.add_typer(compose_app, name="compose")
 
-cache_app = typer.Typer(help="🗄 Manage the local image cache for offline use and faster access.")
+cache_app = typer.Typer(help="🗄 Manage the local image cache.")
 app.add_typer(cache_app, name="cache")
 
 config_app = typer.Typer(help="⚙️ View and manage MirrorBox settings.")
@@ -45,6 +46,7 @@ console = Console()
 
 # --- Helper Function for Mirror Selection ---
 def get_mirrors_to_try() -> list:
+    # This function is unchanged
     config = config_handler.get_config()
     priority_mirror = config.get("priority_mirror")
     all_mirrors_status = [mirrors.check_mirror_status(m) for m in mirrors.MIRRORS]
@@ -59,6 +61,13 @@ def get_mirrors_to_try() -> list:
             console.print(f"[yellow]⚠️ Priority mirror '{priority_mirror}' is offline. Using the next fastest mirror...[/]")
     return online_mirrors
 
+# --- Main Command Definitions ---
+@app.command(name="open", help="🖥️  Opens the graphical user interface (GUI).")
+def open_gui():
+    """Launches the MirrorBox GUI using Flet."""
+    console.print("[bold green]Launching MirrorBox GUI...[/]")
+    gui_app.run()
+
 
 @app.command(name="start", help="🚀 Shows a quick start guide with main commands.")
 def start():
@@ -68,10 +77,20 @@ def start():
     
     welcome_message = """
 [bold green]Welcome to MirrorBox![/bold green]
+This tool is your smart gateway to Docker, designed to accelerate your image pulls.
 
-This tool is your smart gateway to Docker, designed to bypass registry restrictions and accelerate your image pulls using local mirrors and an intelligent cache.
+[bold yellow]✨Graphical User Interface (GUI) ✨[/bold yellow]
 
-Here are the key commands to get you started:
+For an easy, visual experience, try the MirrorBox GUI panel!
+Just run the following command:
+[bold cyan]mirrorbox open[/bold cyan]
+
+In the GUI, you can:
+- View mirror statuses and the list of your Docker images.
+- Manage the local cache.
+- Pull and run your Docker Compose projects.
+---
+[bold]Command-Line Interface (CLI) Guide[/bold]
 
 [bold]Main & Daily Commands[/bold]
 - [cyan]mirrorbox pull [underline]IMAGE[/underline][/cyan]: Smartly pulls an image from the cache or the best mirror.
@@ -108,40 +127,28 @@ Example: `mirrorbox pull --help`
     console.print(panel)
 
 
-# --- Main Command Definitions ---
 @app.command(name="list-images", help="🖼️  Display a list of all images in Docker (equivalent to `docker images`).")
 def list_images():
-    """
-    Executes the `docker images` command and displays the output in a nice table.
-    """
+    # This command is unchanged
     images = image_handler.list_docker_images()
-    
     if images is None:
         return
-    
     if not images:
         console.print("[yellow]No Docker images found.[/]")
         return
-        
     table = Table(title="🐳 Docker Images")
     table.add_column("Repository", style="cyan")
     table.add_column("Tag", style="yellow")
     table.add_column("Image ID", style="dim")
     table.add_column("Size", justify="right", style="green")
-
     for image in images:
-        table.add_row(
-            image['repository'],
-            image['tag'],
-            image['id'],
-            image['size']
-        )
-    
+        table.add_row(image['repository'], image['tag'], image['id'], image['size'])
     console.print(table)
 
 
 @app.command(name="list-mirrors", help="📊 Display a list of all Iranian mirrors and check their status.")
 def list_mirrors():
+    # This command is unchanged
     table = Table(title="🇮🇷 Status of Docker Mirrors in Iran")
     table.add_column("Mirror Address", justify="left", style="cyan", no_wrap=True)
     table.add_column("Status", justify="center", style="magenta")
@@ -158,6 +165,7 @@ def list_mirrors():
 
 @app.command(name="search", help="🔎 Search for a specific image across all online mirrors.")
 def search_image(image_name: str = typer.Argument(..., help="Name of the image, e.g., nginx or ubuntu:22.04")):
+    # This command is unchanged
     table = Table(title=f"🔎 Search Results for Image [bold cyan]{image_name}[/]")
     table.add_column("Mirror Address", justify="left", style="cyan", no_wrap=True)
     table.add_column("Mirror Status", justify="center", style="magenta")
@@ -173,11 +181,10 @@ def search_image(image_name: str = typer.Argument(..., help="Name of the image, 
                 table.add_row(mirror_host, mirror_status['status'], "---")
     console.print(table)
 
-    
-
 
 @app.command(name="pull", help="📥 Pull an image from the priority mirror, the fastest mirror, or the local cache.")
 def pull_image(image_name: str = typer.Argument(..., help="Name of the desired image, e.g., nginx:latest")):
+    # This command is unchanged
     console.print(f"[bold]🚀 Starting process to pull image {image_name}...[/]")
     if cache_handler.load_image_from_cache(image_name):
         return
@@ -201,6 +208,7 @@ def pull_image(image_name: str = typer.Argument(..., help="Name of the desired i
 # --- Other Group Commands ---
 @compose_app.command("up", help="Pulls docker-compose images and then runs the project.")
 def compose_up(ctx: typer.Context):
+    # This command is unchanged
     images_to_pull = compose_handler.get_images_from_compose_file()
     if images_to_pull is None:
         raise typer.Exit(code=1)
@@ -263,6 +271,7 @@ def cache_save(image_name: str = typer.Argument(..., help="Full name of the imag
 
 @cache_app.command("list", help="Lists all images saved in the local cache.")
 def cache_list():
+    # This command is unchanged
     console.print(f"📁 Cache directory path: [dim]{cache_handler.CACHE_DIR}[/]")
     cached_images = cache_handler.list_cached_images()
     if not cached_images:
@@ -278,6 +287,7 @@ def cache_list():
 
 @cache_app.command("remove", help="Removes one or more images from the local cache.")
 def cache_remove(filenames: list[str] = typer.Argument(..., help="Name of the files to be removed.")):
+    # This command is unchanged
     if not filenames:
         console.print("[yellow]Please provide at least one filename to remove.[/]")
         return
@@ -287,6 +297,7 @@ def cache_remove(filenames: list[str] = typer.Argument(..., help="Name of the fi
 
 @config_app.command("show", help="Displays the current application settings.")
 def config_show():
+    # This command is unchanged
     console.print(f"⚙️ Config file path: [dim]{config_handler.CONFIG_FILE}[/]")
     config = config_handler.get_config()
     priority = config.get("priority_mirror")
@@ -298,6 +309,7 @@ def config_show():
 
 @config_app.command("set-priority", help="Sets a mirror as the priority mirror.")
 def config_set_priority(mirror_name: str = typer.Argument(..., help=f"Name of one of the supported mirrors.")):
+    # This command is unchanged
     if mirror_name not in mirrors.MIRRORS:
         console.print(f"[bold red]❌ Mirror '{mirror_name}' is not supported.[/]")
         console.print(f"Please choose one of the following: {', '.join(mirrors.MIRRORS)}")
@@ -310,6 +322,7 @@ def config_set_priority(mirror_name: str = typer.Argument(..., help=f"Name of on
 
 @config_app.command("unset-priority", help="Unsets the priority mirror.")
 def config_unset_priority():
+    # This command is unchanged
     config = config_handler.get_config()
     if config.get("priority_mirror"):
         config["priority_mirror"] = None
@@ -321,6 +334,7 @@ def config_unset_priority():
 
 @report_app.command("show", help="Displays the performance history of mirrors.")
 def report_show(limit: int = typer.Option(20, "--limit", "-l", help="Number of recent events to display.")):
+    # This command is unchanged
     history = history_handler.get_history()
     if not history:
         console.print("[yellow]No history to display.[/]")
@@ -343,6 +357,7 @@ def report_show(limit: int = typer.Option(20, "--limit", "-l", help="Number of r
 def monitor_start(
     interval: int = typer.Option(10, "--interval", "-i", help="Update interval in seconds.")
 ):
+    # This command is unchanged
     def generate_table() -> Table:
         table = Table(title=f"🖥️ Live Mirror Status Dashboard (Updates every {interval}s)", caption="Press Ctrl+C to exit")
         table.add_column("Mirror Address", justify="left", style="cyan")
@@ -361,4 +376,3 @@ def monitor_start(
                 live.update(generate_table())
     except KeyboardInterrupt:
         console.print("\n[yellow]Monitoring dashboard stopped.[/]")
-        

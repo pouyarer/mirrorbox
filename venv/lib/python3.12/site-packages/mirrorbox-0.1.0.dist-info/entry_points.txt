@@ -1,0 +1,2 @@
+[console_scripts]
+mirrorbox = mirrorbox.cli:app

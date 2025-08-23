@@ -1,5 +1,6 @@
 import yaml
 from pathlib import Path
+import subprocess
 from rich.console import Console
 
 console = Console()
@@ -35,3 +36,39 @@ def get_images_from_compose_file() -> list[str]:
     except Exception as e:
         console.print(f"[bold red]Error reading docker-compose file: {e}[/]")
         return None
+
+
+def run_compose_up():
+    """
+    Runs `docker compose up -d`.
+    """
+    try:
+        result = subprocess.run(
+            ["docker", "compose", "up", "-d"],
+            check=True,
+            capture_output=True,
+            text=True
+        )
+        return True, result.stdout
+    except subprocess.CalledProcessError as e:
+        return False, f"Failed to run docker compose up: {e.stderr}"
+    except Exception as e:
+        return False, f"Exception while running docker compose up: {e}"
+
+
+def run_compose_down():
+    """
+    Runs `docker compose down`.
+    """
+    try:
+        result = subprocess.run(
+            ["docker", "compose", "down"],
+            check=True,
+            capture_output=True,
+            text=True
+        )
+        return True, result.stdout
+    except subprocess.CalledProcessError as e:
+        return False, f"Failed to run docker compose down: {e.stderr}"
+    except Exception as e:
+        return False, f"Exception while running docker compose down: {e}"

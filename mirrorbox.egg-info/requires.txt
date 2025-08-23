@@ -1,4 +1,5 @@
-typer[all]
+typer
 rich
 requests
 pyyaml
+flet
