@@ -35,7 +35,7 @@ venv\Scripts\activate.bat (Windonws)
 ```
 ## 3️⃣ Install MirrorBox
 ```bash
-pip install mirrorbox
+pip install --upgrade mirrorbox
 ```
 ## 🛠️ Usage / Commands
 ```bash
