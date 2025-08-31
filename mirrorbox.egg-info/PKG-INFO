@@ -1,23 +1,16 @@
 Metadata-Version: 2.4
 Name: mirrorbox
-Version: 0.1.0
-Summary: A smart, caching proxy for Docker, designed to bypass registry restrictions and accelerate your image pulls.
+Version: 1.0.0
+Summary: A smart, caching proxy for Docker, designed to bypass registry restrictions and accelerate image pulls.
 Author-email: Pouya Rezapour <pouyarezapourr@gmail.com>
-License: **Copyright (c) 2025 Pouya Rezapour**  
-        Contact: pouyarezapourr@gmail.com
-        
-        Permission is hereby granted for **both commercial and non-commercial use** of this software and its associated code, **provided that** the following conditions are met:
-        
-        1. **Notification and Approval:** Prior to using this software or code in any personal or commercial project, you must contact the author (Pouya Rezapour) and inform them about your intended use. Usage is permitted only after this notification.  
-        2. **Copyright Notice:** The above copyright notice and this permission notice must be included in all copies or significant portions of the Software.  
-        3. **Disclaimer:** The Software is provided "as-is", without any warranty of any kind, express or implied, including but not limited to the warranties of merchantability, fitness for a particular purpose, or non-infringement. The authors shall not be liable for any claims, damages, or other liabilities arising from its use.
-        
-        By using this software, you agree to comply with the conditions above.
-        
+License: MIT License
 Project-URL: Homepage, https://github.com/pouyarer/mirrorbox
+Project-URL: Repository, https://github.com/pouyarer/mirrorbox
 Classifier: Programming Language :: Python :: 3
-Classifier: License :: OSI Approved :: MIT License
 Classifier: Operating System :: OS Independent
+Classifier: Environment :: Console
+Classifier: Topic :: Software Development :: Build Tools
+Classifier: Topic :: System :: Software Distribution
 Requires-Python: >=3.10
 Description-Content-Type: text/markdown
 License-File: LICENSE
@@ -71,6 +64,24 @@ pip install mirrorbox
 ```bash
 mirrorbox start
 ```
+
+---
+
+## ✨ New in v1.0: The Graphical User Interface!
+
+For a more visual and user-friendly experience, you can now launch the MirrorBox desktop application.
+
+Simply run:
+```bash
+mirrorbox open
+```
+
+The GUI allows you to manage all key features of MirrorBox from a beautiful and modern interface.
+
+![MirrorBox GUI](assets/mirrorbox-gui.png)
+
+---
+
 
 Below is a detailed guide to available commands:
 ## 1. Basic Mirror & Image Commands

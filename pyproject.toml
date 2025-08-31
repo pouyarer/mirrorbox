@@ -1,25 +1,38 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
 [project]
 name = "mirrorbox"
 version = "1.0.0"
-authors = [{ name = "Pouya Rezapour", email = "pouyarezapourr@gmail.com" }]
-description = "A smart, caching proxy for Docker, designed to bypass registry restrictions and accelerate your image pulls."
+authors = [
+    { name = "Pouya Rezapour", email = "pouyarezapourr@gmail.com" },
+]
+description = "A smart, caching proxy for Docker, designed to bypass registry restrictions and accelerate image pulls."
 readme = "README.md"
 requires-python = ">=3.10"
-license = { file = "LICENSE" }
+license = { text = "MIT License" }
 classifiers = [
     "Programming Language :: Python :: 3",
-    "License :: OSI Approved :: MIT License",
     "Operating System :: OS Independent",
+    "Environment :: Console",
+    "Topic :: Software Development :: Build Tools",
+    "Topic :: System :: Software Distribution",
 ]
 dependencies = [
     "typer",
     "rich",
     "requests",
     "pyyaml",
-    "flet", 
+    "flet",
+]
 
 [project.urls]
-Homepage = "https://github.com/pouyarer/mirrorbox"
+"Homepage" = "https://github.com/pouyarer/mirrorbox"
+"Repository" = "https://github.com/pouyarer/mirrorbox"
 
 [project.scripts]
 mirrorbox = "mirrorbox.cli:app"
+
+[tool.setuptools.packages.find]
+include = ["mirrorbox"]

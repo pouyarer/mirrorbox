@@ -1,3 +1,4 @@
+# mirrorbox/main.py (Final version with Flet GUI)
 import typer
 from rich.console import Console
 from rich.table import Table
@@ -19,7 +20,7 @@ import mirrorbox.cache_handler as cache_handler
 import mirrorbox.config_handler as config_handler
 import mirrorbox.history_handler as history_handler
 import mirrorbox.image_handler as image_handler
-import mirrorbox.gui_app as gui_app 
+import mirrorbox.gui_app as gui_app # <-- Import our new Flet GUI app
 
 app = typer.Typer(
     help="MirrorBox: A smart tool for managing and pulling Docker images.",
@@ -71,10 +72,7 @@ def open_gui():
 
 @app.command(name="start", help="🚀 Shows a quick start guide with main commands.")
 def start():
-    """
-    Displays a welcome panel and a quick start guide for MirrorBox.
-    """
-    
+    # This command is unchanged
     welcome_message = """
 [bold green]Welcome to MirrorBox![/bold green]
 This tool is your smart gateway to Docker, designed to accelerate your image pulls.
@@ -116,14 +114,12 @@ In the GUI, you can:
 For more details on any command, use the `--help` flag.
 Example: `mirrorbox pull --help`
 """
-    
     panel = Panel.fit(
         welcome_message,
         title="🎉 MirrorBox Quick Start Guide 🎉",
         border_style="blue",
         padding=(1, 2)
     )
-    
     console.print(panel)
 
 
@@ -206,7 +202,7 @@ def pull_image(image_name: str = typer.Argument(..., help="Name of the desired i
     cache_handler.save_image_to_cache(image_name)
 
 # --- Other Group Commands ---
-@compose_app.command("up", help="Pulls docker-compose images and then runs the project.")
+@compose_app.command("up", help="Pulls docker-compose images and then runs the project.", context_settings={"ignore_unknown_options": True, "allow_extra_args": True})
 def compose_up(ctx: typer.Context):
     # This command is unchanged
     images_to_pull = compose_handler.get_images_from_compose_file()
