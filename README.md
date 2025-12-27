@@ -173,7 +173,3 @@ Building enterprise-grade tools requires coffee and dedication. If MirrorBox sav
 <div align="center">
 <sub>Powered by <b>Testeto</b> | Developed by <a href="https://pouyarezapour.ir"><b>Pouya Rezapour</b></a></sub>
 </div>
-
-```
-
-```
