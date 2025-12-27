@@ -1,1 +1,4 @@
+include README.md
+include LICENSE
 recursive-include mirrorbox/dist *
+recursive-include mirrorbox/assets *
