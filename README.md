@@ -47,7 +47,7 @@ For servers and CI/CD pipelines, MirrorBox can configure your Docker Daemon dire
 A beautiful, glassmorphism-based interface to manage your images, monitor network health, and visualize your cache.
 
 <div align="center">
-  <img src="assets/Mirrorbox.png" alt="MirrorBox Dashboard" width="100%" style="border-radius: 10px; border: 1px solid #333;" />
+  <img src="assets/MirrorBox.png" alt="MirrorBox Dashboard" width="100%" style="border-radius: 10px; border: 1px solid #333;" />
 </div>
 
 ---
