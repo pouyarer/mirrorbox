@@ -1,22 +1,61 @@
-# Python build artifacts
+# --- Python Core ---
 __pycache__/
-*.pyc
-*.pyo
-*.pyd
-*.egg-info/
+*.py[cod]
+*$py.class
+*.so
+.Python
+
+# --- Distribution / Packaging ---
 build/
 dist/
+*.egg-info/
+.eggs/
+*.egg
+MANIFEST
 
-# Virtual Environment
+# --- Virtual Environments ---
 .venv/
 venv/
 env/
+ENV/
 
-# IDE configuration files
+# --- Frontend (React/Vite) ---
+frontend/node_modules/
+frontend/dist/
+frontend/.env
+frontend/.env.local
+frontend/.env.*.local
+frontend/npm-debug.log*
+frontend/yarn-debug.log*
+frontend/yarn-error.log*
+frontend/pnpm-debug.log*
+
+# --- MirrorBox Project Specifics ---
+# We ignore the compiled UI copied into the python package
+mirrorbox/dist/
+# Local configuration and cache directory
+.mirrorbox/
+# Large Tarball files (Local Cache backups)
+*.tar
+
+# --- IDE & Editors ---
 .vscode/
 .idea/
 *.swp
 *.swo
+*~
 
-# MirrorBox local user files (optional, as it's in home dir)
-.mirrorbox/
+# --- macOS System Files (Important for Mac Users) ---
+.DS_Store
+.AppleDouble
+.LSOverride
+._*
+
+# --- Windows System Files ---
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# --- Logs & Databases ---
+*.log
+*.sqlite

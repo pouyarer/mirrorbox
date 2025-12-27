@@ -1,4 +1,5 @@
 LICENSE
+MANIFEST.in
 README.md
 pyproject.toml
 mirrorbox/__init__.py
@@ -8,6 +9,7 @@ mirrorbox/compose_handler.py
 mirrorbox/config_handler.py
 mirrorbox/docker_cli.py
 mirrorbox/gui_app.py
+mirrorbox/help_formatter.py
 mirrorbox/history_handler.py
 mirrorbox/image_handler.py
 mirrorbox/main.py
@@ -18,3 +20,7 @@ mirrorbox.egg-info/dependency_links.txt
 mirrorbox.egg-info/entry_points.txt
 mirrorbox.egg-info/requires.txt
 mirrorbox.egg-info/top_level.txt
+mirrorbox/dist/index.html
+mirrorbox/dist/assets/index-C0LWqcUO.css
+mirrorbox/dist/assets/index-D3ZaNYqz.js
+mirrorbox/dist/assets/logo-9CR48aHW.png

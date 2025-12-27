@@ -1,69 +1,115 @@
 import subprocess
 import sys
+import shutil
+import requests
 from rich.console import Console
-from . import history_handler # <-- Import the history module
+from . import history_handler, mirrors
 
 console = Console()
 
-def pull_image_from_mirror(image_name: str, mirror: str) -> bool:
-    """
-    Pulls an image from the specified mirror, re-tags it, and logs the result.
-    """
-    if ":" in image_name:
-        simple_name_no_tag, tag = image_name.split(":", 1)
-    else:
-        simple_name_no_tag, tag = image_name, "latest"
+def get_best_mirror():
+    """Finds the fastest online mirror."""
+    for mirror in mirrors.MIRRORS:
+        if mirrors.check_mirror_status(mirror)['status'] == 'Online ✅':
+            return mirror
+    return None
 
-    if "/" not in simple_name_no_tag:
-        full_image_name = f"library/{simple_name_no_tag}"
-    else:
-        full_image_name = simple_name_no_tag
+def transform_image_name(image_arg: str, mirror: str) -> str:
+    if "/" in image_arg and "." in image_arg.split("/")[0]:
+        return image_arg
     
-    mirrored_image_with_tag = f"{mirror}/{full_image_name}:{tag}"
-
-    console.print(f"Attempting to pull image [bold cyan]{mirrored_image_with_tag}[/]...")
-    command = ["docker", "pull", mirrored_image_with_tag]
+    name_part = image_arg
+    tag = "latest"
+    if ":" in image_arg:
+        name_part, tag = image_arg.split(":", 1)
     
-    success = False
-    details = ""
+    if "/" not in name_part:
+        name_part = f"library/{name_part}"
+        
+    return f"{mirror}/{name_part}:{tag}"
 
+def proxy_docker_command(args: list):
+    """Smart proxy for docker commands."""
+    docker_path = shutil.which("docker")
+    if not docker_path:
+        console.print("[bold red]❌ Docker is not installed.[/]")
+        sys.exit(1)
+
+    image_commands = ["pull", "run", "create"]
+    command = args[0] if args else ""
+    new_args = list(args)
+    
+    if command in image_commands:
+        best_mirror = get_best_mirror()
+        if best_mirror:
+            image_index = -1
+            for i, arg in enumerate(args[1:], start=1):
+                if not arg.startswith("-"):
+                    image_index = i
+                    break
+            
+            if image_index != -1:
+                original_image = args[image_index]
+                new_image = transform_image_name(original_image, best_mirror)
+                new_args[image_index] = new_image
+                console.print(f"[dim]🔄 Redirecting [cyan]{original_image}[/] via [green]{best_mirror}[/]...[/]")
+
+    full_cmd = [docker_path] + new_args
+    
     try:
-        process = subprocess.Popen(
-            command, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True, encoding='utf-8'
+        process = subprocess.run(full_cmd)
+        history_handler.log_event(
+            mirror="proxy-mode",
+            event_type=f"docker {command}",
+            success=(process.returncode == 0),
+            latency_ms=0
         )
-        # We collect the output to display in case of an error
-        output_lines = []
-        for line in iter(process.stdout.readline, ''):
-            if line:
-                print(line.strip())
-                output_lines.append(line.strip())
-        process.wait()
-
-        if process.returncode == 0:
-            console.print(f"✅ Image successfully pulled from {mirror}.")
-            try:
-                console.print(f"Re-tagging image to [cyan]{image_name}[/]...")
-                tag_command = ["docker", "tag", mirrored_image_with_tag, image_name]
-                subprocess.run(tag_command, check=True, capture_output=True)
-                console.print(f"✅ Tagging successful.")
-                success = True
-            except subprocess.CalledProcessError as e:
-                details = f"Tagging failed: {e.stderr.strip()}"
-                console.print(f"[bold red]❌ Error tagging image: {details}[/]")
-        else:
-            details = "Pull command failed."
-            console.print(f"[bold red]❌ Failed to pull image from {mirror}.[/]")
-
+        if process.returncode != 0:
+            sys.exit(process.returncode)
+    except KeyboardInterrupt:
+        console.print("\n[yellow]Operation cancelled.[/]")
     except Exception as e:
-        details = str(e)
-        console.print(f"[bold red]An unexpected error occurred: {details}[/]")
-    
-    # --- New section: Log the pull result to history ---
-    history_handler.log_event(
-        mirror=mirror,
-        event_type="pull_attempt",
-        success=success,
-        details=f"image: {image_name}, error: {details}" if not success else f"image: {image_name}"
-    )
+        console.print(f"[bold red]Error executing docker command: {e}[/]")
 
-    return success
+def search_image_in_mirrors(image_name: str):
+    """Searches for an image across all mirrors."""
+    results = []
+    if ":" in image_name:
+        name, tag = image_name.split(":", 1)
+    else:
+        name, tag = image_name, "latest"
+    
+    if "/" not in name:
+        name = f"library/{name}"
+
+    for mirror in mirrors.MIRRORS:
+        url = f"https://{mirror}/v2/{name}/manifests/{tag}"
+        try:
+            resp = requests.head(url, timeout=3, allow_redirects=True)
+            available = resp.status_code == 200
+            results.append({
+                "mirror": mirror,
+                "available": available,
+                "status_code": resp.status_code
+            })
+        except:
+            results.append({
+                "mirror": mirror,
+                "available": False,
+                "status_code": "Error"
+            })
+    return results
+
+def run_compose_up(file_path: str):
+    """Runs docker compose up -d."""
+    try:
+        cmd = ["docker", "compose", "-f", file_path, "up", "-d"]
+        process = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+        stdout, stderr = process.communicate()
+        
+        if process.returncode == 0:
+            return True, "Compose started successfully.\n" + stdout
+        else:
+            return False, f"Error:\n{stderr}"
+    except Exception as e:
+        return False, str(e)

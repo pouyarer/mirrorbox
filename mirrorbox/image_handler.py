@@ -1,47 +1,40 @@
 import subprocess
-from rich.console import Console
+import json
+from typing import List, Dict
 
-console = Console()
-
-def list_docker_images() -> list | None:
+def list_docker_images() -> List[Dict]:
     """
-    Gets and parses the list of existing Docker images in a specific format.
+    Returns list of local docker images using `docker images` command.
     """
-    # Using format to get a clean and parsable output
-    command = ["docker", "images", "--format", "{{.Repository}}\t{{.Tag}}\t{{.ID}}\t{{.Size}}"]
-    
     try:
-        process = subprocess.run(
-            command,
-            check=True,
-            capture_output=True,
-            text=True,
-            encoding='utf-8'
-        )
+        cmd = ["docker", "images", "--format", "{{json .}}"]
+        result = subprocess.run(cmd, capture_output=True, text=True)
         
-        output = process.stdout.strip()
-        if not output:
+        if result.returncode != 0:
             return []
 
         images = []
-        for line in output.split('\n'):
-            try:
-                repo, tag, image_id, size = line.split('\t')
-                images.append({
-                    "repository": repo,
-                    "tag": tag,
-                    "id": image_id,
-                    "size": size
-                })
-            except ValueError:
-                # In case of unexpected lines, ignore them
-                continue
-        
+        for line in result.stdout.strip().split('\n'):
+            if line:
+                try:
+                    img = json.loads(line)
+                    images.append({
+                        "repository": img.get("Repository", "<none>"),
+                        "tag": img.get("Tag", "<none>"),
+                        "id": img.get("ID", "")[:12],
+                        "size": img.get("Size", "0B"),
+                        "created": img.get("CreatedSince", "")
+                    })
+                except json.JSONDecodeError:
+                    continue
         return images
+    except Exception:
+        return []
 
-    except FileNotFoundError:
-        console.print("[bold red]Error: 'docker' command not found. Is Docker installed and running?[/]")
-        return None
-    except subprocess.CalledProcessError as e:
-        console.print(f"[bold red]Error executing 'docker images' command: {e.stderr.strip()}[/]")
-        return None
+def remove_image(image_id: str):
+    """Runs docker rmi."""
+    try:
+        subprocess.run(["docker", "rmi", image_id], check=True)
+        return True
+    except subprocess.CalledProcessError:
+        return False

@@ -1,81 +1,75 @@
-from pathlib import Path
+import os
 import subprocess
+import json
+from pathlib import Path
 from rich.console import Console
 
 console = Console()
 
 CACHE_DIR = Path.home() / ".mirrorbox" / "cache"
 
-def ensure_cache_dir_exists():
-    CACHE_DIR.mkdir(parents=True, exist_ok=True)
+def ensure_cache_dir():
+    if not CACHE_DIR.exists():
+        CACHE_DIR.mkdir(parents=True, exist_ok=True)
 
-def get_cache_filepath(image_name: str) -> Path:
-    sanitized_name = image_name.replace("/", "_").replace(":", "-")
-    return CACHE_DIR / f"{sanitized_name}.tar"
-
-def save_image_to_cache(image_name: str) -> bool:
-    ensure_cache_dir_exists()
-    filepath = get_cache_filepath(image_name)
-    console.print(f"Saving image [cyan]{image_name}[/] to local cache...")
-    console.print(f"File path: [dim]{filepath}[/]")
-    command = ["docker", "save", "-o", str(filepath), image_name]
-    try:
-        process = subprocess.run(command, check=True, capture_output=True, text=True)
-        console.print(f"[bold green]✅ Image {image_name} successfully saved to cache.[/]")
-        return True
-    except FileNotFoundError:
-        console.print("[bold red]Error: 'docker' command not found.[/]")
-        return False
-    except subprocess.CalledProcessError as e:
-        console.print(f"[bold red]❌ Error saving image: {e.stderr.strip()}[/]")
-        console.print(f"[yellow]Does the image '{image_name}' exist locally in your Docker daemon?[/]")
-        return False
-    except Exception as e:
-        console.print(f"[bold red]An unexpected error occurred: {e}[/]")
-        return False
-
-def list_cached_images() -> list:
-    """Returns a list of cached images along with their sizes."""
-    ensure_cache_dir_exists()
+def list_cached_images():
+    """Returns a list of cached tarballs with their size."""
+    ensure_cache_dir()
     files = []
     for f in CACHE_DIR.glob("*.tar"):
-        size_mb = f.stat().st_size / (1024 * 1024)
-        files.append({"filename": f.name, "size_mb": round(size_mb, 2)})
+        size_mb = round(f.stat().st_size / (1024 * 1024), 2)
+        files.append({
+            "filename": f.name,
+            "size_mb": size_mb,
+            "path": str(f)
+        })
     return files
 
+def save_image_to_cache(image_name: str):
+    """
+    1. Pulls the image (if not present).
+    2. Saves it as a tarball.
+    """
+    ensure_cache_dir()
+    
+    clean_name = image_name.replace("/", "_").replace(":", "_")
+    output_path = CACHE_DIR / f"{clean_name}.tar"
+    
+    if output_path.exists():
+        return f"Image {clean_name} already exists in cache."
+
+    console.print(f"[cyan]Ensuring {image_name} is available locally...[/]")
+    subprocess.run(["docker", "pull", image_name], check=True)
+    
+    console.print(f"[green]Saving {image_name} to cache...[/]")
+    cmd = ["docker", "save", "-o", str(output_path), image_name]
+    subprocess.run(cmd, check=True)
+    
+    return f"Successfully saved to {output_path.name}"
+
 def load_image_from_cache(image_name: str) -> bool:
-    """Loads an image from the local cache into Docker."""
-    filepath = get_cache_filepath(image_name)
-    if not filepath.exists():
-        return False
-
-    console.print(f"Image [cyan]{image_name}[/] found in local cache. Loading...")
-    command = ["docker", "load", "-i", str(filepath)]
-    try:
-        subprocess.run(command, check=True, capture_output=True, text=True)
-        console.print(f"[bold green]✅ Image {image_name} successfully loaded from cache.[/]")
-        return True
-    except subprocess.CalledProcessError as e:
-        console.print(f"[bold red]❌ Error loading image from cache: {e.stderr.strip()}[/]")
-        return False
-    except Exception as e:
-        console.print(f"[bold red]An unexpected error occurred while loading from cache: {e}[/]")
-        return False
-
-
-def remove_image_from_cache(filename: str) -> bool:
-    """Removes a specific file from the cache directory."""
-    ensure_cache_dir_exists()
-    filepath = CACHE_DIR / filename
+    """
+    Checks if image exists in cache tarball, if so, loads it into Docker.
+    Returns True if loaded from cache.
+    """
+    clean_name = image_name.replace("/", "_").replace(":", "_")
+    tar_path = CACHE_DIR / f"{clean_name}.tar"
     
-    if not filepath.exists() or not filename.endswith(".tar"):
-        console.print(f"[bold red]❌ File '{filename}' not found in cache.[/]")
-        return False
-    
-    try:
-        filepath.unlink()
-        console.print(f"[bold green]✅ File '{filename}' successfully removed from cache.[/]")
+    if tar_path.exists():
+        console.print(f"[bold yellow]📦 Found {image_name} in Local Cache. Loading...[/]")
+        try:
+            subprocess.run(["docker", "load", "-i", str(tar_path)], check=True)
+            return True
+        except Exception as e:
+            console.print(f"[red]Failed to load cache: {e}[/]")
+            return False
+    return False
+
+def remove_image_from_cache(filename: str):
+    """Deletes the tarball."""
+    ensure_cache_dir()
+    path = CACHE_DIR / filename
+    if path.exists():
+        os.remove(path)
         return True
-    except Exception as e:
-        console.print(f"[bold red]Error deleting file: {e}[/]")
-        return False
+    return False

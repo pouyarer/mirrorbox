@@ -2,4 +2,5 @@ typer
 rich
 requests
 pyyaml
-flet
+pywebview
+platformdirs
