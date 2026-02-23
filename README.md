@@ -172,5 +172,5 @@ Building enterprise-grade tools requires coffee and dedication. If MirrorBox sav
 ### [💎 Donate & Support](https://pay.oxapay.com/14009511)
 
 <div align="center">
-<sub>Powered by <b>Testeto</b> | Developed by <a href="https://pouyarezapour.ir"><b>Pouya Rezapour</b></a></sub>
+<sub>Powered by <a href="https://testeto.ir"><b>Pouya Rezapour</b> | Developed by <a href="https://pouyarezapour.ir"><b>Pouya Rezapour</b></a></sub>
 </div>
